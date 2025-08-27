@@ -4,10 +4,15 @@ from io import BytesIO
 
 clamd_host = '172.17.0.2'
 clamd_port = 3310
+test_file='/home/hyagi/Downloads/eicarcom2.zip'
+
+
 clamd_client = clamd.ClamdNetworkSocket(host=clamd_host, port=clamd_port)
 
 # The binary data to scan
-binary_data = b'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*'
+#binary_data = b'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*'
+with open(test_file,'rb') as file:
+    binary_data = file.read()
 
 # Create a BytesIO object (in-memory stream) from the binary data
 data_stream = BytesIO(binary_data)
@@ -15,7 +20,7 @@ data_stream = BytesIO(binary_data)
 try:
     clamd_client._init_socket()
     clamd_client._send_command("INSTREAM")
-    max_chunk_size = 32
+    max_chunk_size = 100
     chunk = data_stream.read(max_chunk_size)
     while chunk:
         size = struct.pack(b"!L", len(chunk))
