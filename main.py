@@ -1,3 +1,4 @@
+import struct
 from clamav_client import clamd
 from io import BytesIO
 
@@ -12,15 +13,22 @@ binary_data = b'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!
 data_stream = BytesIO(binary_data)
 
 try:
-    # Use the scan_stream method to send the data
-    #result = clamd_client.scan_stream(data_stream)
-    result = clamd_client.instream(data_stream)
-
-    # The result is a dictionary with the filename as key
-    if result['stream'][0] == 'OK':
-        print("Scan successful, no threats found.")
+    clamd_client._init_socket()
+    clamd_client._send_command("INSTREAM")
+    max_chunk_size = 32
+    chunk = data_stream.read(max_chunk_size)
+    while chunk:
+        size = struct.pack(b"!L", len(chunk))
+        clamd_client.clamd_socket.send(size + chunk)
+        chunk = data_stream.read(max_chunk_size)
+    clamd_client.clamd_socket.send(struct.pack(b"!L", 0))
+    result = clamd_client._recv_response()
+    if len(result) > 0:
+        if result == "INSTREAM size limit exceeded. ERROR":
+            print("ERROR!!!")
+        filename, reason, status = clamd_client._parse_response(result)
+        print({filename: (status, reason)})
     else:
-        print(f"Malware found: {result['stream'][1]}")
-
-except Exception as e:
-    print(f"An error occurred: {e}")
+        print({})
+finally:
+    clamd_client._close_socket()
