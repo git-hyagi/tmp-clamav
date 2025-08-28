@@ -1,8 +1,20 @@
 # RUNNING
 
+* create a clamav conf file (needed because the default StreamMaxLength is 25M):
+```
+cat <<EOF>/tmp/clamav.conf
+LogFile /var/log/clamav/clamd.log
+LogTime yes
+LocalSocket /tmp/clamd.sock
+TCPSocket 3310
+User clamav
+StreamMaxLength 2G
+EOF
+```
+
 * run the clamav container:
 ```
-docker run -it --rm --name "clamav" clamav/clamav:1.4.3
+docker run -it --rm --name "clamav" -v /tmp/clamav.conf:/etc/clamav/clamd.conf:ro clamav/clamav:1.4.3
 ```
 
 * gather the container ip
