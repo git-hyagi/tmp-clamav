@@ -17,13 +17,16 @@ clamd_client = clamd.ClamdNetworkSocket(host=clamd_host, port=clamd_port)
 with open(test_file,'rb') as file:
     binary_data = file.read()
 
-total_chunks = len(binary_data) // max_chunk_size
+file_size = len(binary_data)
+total_chunks = file_size // max_chunk_size
 
 # Create a BytesIO object (in-memory stream) from the binary data
 data_stream = BytesIO(binary_data)
 
 chunks_count=0
-print(f"Scan started: {datetime.datetime.now()}")
+print(f"Scanning file: {test_file}")
+print(f"file size: {file_size:,}")
+print(f"Sending first chunk: {datetime.datetime.now()}")
 try:
     clamd_client._init_socket()
     clamd_client._send_command("INSTREAM")

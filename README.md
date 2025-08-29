@@ -9,6 +9,8 @@ LocalSocket /tmp/clamd.sock
 TCPSocket 3310
 User clamav
 StreamMaxLength 2G
+MaxFileSize 2G
+MaxScanSize 2G
 EOF
 ```
 
